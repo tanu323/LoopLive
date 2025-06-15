@@ -1,0 +1,357 @@
+Let's build the Reels/Short Video Sharing web app using FastAPI (backend) and React (frontend) with WebSockets. We'll start with the FastAPI backend.
+
+Core Features
+
+MVP (Minimum Viable Product)
+Upload short videos
+View video feed (auto-play vertically like Reels)
+[1] Client uploads to S3 using presigned URL
+[2] Client sets draft editing & post info (VideoDraft)
+[3] Client clicks “Post”
+[4] Backend:
+     - validates the draft
+     - pulls all relevant fields
+     - creates a `Video`
+     - deletes the draft (or marks finalized)
+Like a video
+Add comments
+User registration/login (JWT)
+Infinite scrolling
+Real-time like/comment updates (WebSockets)
+
+
+Video Router Responsibility Breakdown
+1. video_create_router.py
+Handles:
+
+POST /videos/upload-url — Get pre-signed S3 URL
+
+POST /videos/drafts — Create video draft
+
+PATCH /videos/drafts/{draft_id} — Update editing fields
+
+POST /videos/finalize — Finalize draft into public video
+
+GET /videos/drafts/{draft_id} — Get draft info (if needed)
+
+2. video_manage_router.py
+Handles:
+
+DELETE /videos/{video_id} — Delete a video
+
+PATCH /videos/{video_id}/privacy — Update privacy
+
+PATCH /videos/{video_id}/feature — Mark as featured
+
+PATCH /videos/{video_id}/details — Update video details (desc, tags, etc.)
+
+3. video_explore_router.py
+Handles:
+
+GET /videos/{video_id} — View video details
+
+GET /videos/user/{user_id} — User's videos
+
+GET /videos/stream/{video_id} — Get playback URL
+
+GET /videos/thumbnail/{video_id} — Thumbnail URL
+
+GET /videos/featured — Discover featured videos
+
+GET /videos/search — Search videos
+
+POST /videos/{video_id}/views — Increment views
+
+4. video_interact_router.py
+Handles:
+
+POST /videos/{video_id}/like — Like
+
+DELETE /videos/{video_id}/unlike — Unlike
+
+GET /videos/{video_id}/likes — Who liked
+
+POST /videos/{video_id}/comment — Comment
+
+GET /videos/{video_id}/comments — Comments list
+
+
+
+Tech Stack
+
+Backend FastAPI + MongoDB (via Motor)
+Video Storage AWS S3 (via boto3)
+Frontend React + Tailwind + useEffect hooks
+Auth JWT (FastAPI backend+ python-jose + localStorage on frontend)
+Frontend React + Tailwind CSS
+Real-time FastAPI WebSockets
+
+
+
+
+
+
+
+
+
+
+
+
+Great — since you've completed your **database models** for the MVP using Pydantic + Motor + FastAPI, the next logical steps break into three main areas: **infrastructure setup**, **feature-wise backend implementation**, and **frontend integration**.
+
+---
+
+## ✅ Next Steps After Defining DB Models
+
+---
+
+### 🔧 1. **Set Up Project Infrastructure**
+
+#### ✅ Backend Setup
+
+* [ ] Set up FastAPI project structure (`app/`, `routers/`, `models/`, `schemas/`, `db/`, `services/`, etc.)
+* [ ] Set up `Motor` MongoDB client in `db/mongo.py`
+* [ ] Set up `boto3` client for AWS S3 in `utils/s3.py`
+* [ ] Set up JWT utilities in `auth/jwt.py` using `python-jose`
+* [ ] Set up WebSocket manager in `websockets/manager.py`
+
+Example folder structure:
+
+```
+app/
+├── auth/
+│   └── jwt.py
+├── db/
+│   └── mongo.py
+├── models/
+│   └── models.py
+├── routers/
+│   ├── users.py
+│   ├── videos.py
+│   └── comments.py
+├── utils/
+│   └── s3.py
+├── main.py
+```
+
+---
+
+### 🔐 2. **Implement Authentication**
+
+* [ ] **Signup route**: `/auth/register`
+* [ ] **Login route**: `/auth/login`
+* [ ] Hash password using `passlib`
+* [ ] Generate JWT token and return to frontend
+* [ ] Auth middleware to protect routes (dependency that verifies JWT)
+
+---
+
+### 📹 3. **Implement Core API Routes**
+
+These correspond to your MVP features:
+
+#### `/videos`
+
+* [ ] `POST /upload`: Upload video metadata + upload file to S3
+* [ ] `GET /feed`: Get paginated video feed (for infinite scroll)
+* [ ] `GET /{video_id}`: Get single video info
+
+#### `/likes`
+
+* [ ] `POST /like`: Add like
+* [ ] `DELETE /unlike`: Remove like
+
+#### `/comments`
+
+* [ ] `POST /comment`: Add comment
+* [ ] `GET /comments/{video_id}`: Get comments on a video
+
+#### `/users`
+
+* [ ] `GET /me`: Get current user profile
+* [ ] `GET /{user_id}`: Get user info
+
+---
+
+### 📡 4. **Set Up WebSockets (FastAPI)**
+
+* [ ] Create `/ws` WebSocket endpoint
+* [ ] Implement `ConnectionManager` for broadcasting real-time likes/comments
+* [ ] Broadcast new comments/likes to relevant users
+
+---
+
+### ☁️ 5. **Set Up AWS S3 for Video Upload**
+
+* [ ] Use `boto3` to:
+
+  * Upload videos
+  * Generate signed URLs if needed
+* [ ] Store `s3_url` and optional `thumbnail_url` in MongoDB
+
+---
+
+### 🌐 6. **Create Frontend UI (React + Tailwind)**
+
+After backend API is testable:
+
+* [ ] Login/Register UI (token saved to `localStorage`)
+* [ ] Video Feed component (autoplay + infinite scroll)
+* [ ] Upload form (video file + optional description)
+* [ ] Like/Comment buttons (WebSocket updates)
+* [ ] Profile page
+* [ ] Use `axios` or `fetch` to call FastAPI APIs
+
+---
+
+### 🧪 7. **Testing**
+
+* [ ] Use `pytest` + `httpx` for async route testing
+* [ ] Add basic unit tests for key routes and logic
+* [ ] Manual test with Postman or Swagger UI (`/docs`)
+
+---
+
+## ✅ Summary Milestones
+
+| Milestone                    | Status   |
+| ---------------------------- | -------- |
+| Mongo Models                 | ✅ Done   |
+| FastAPI project structure    | ⬜️ To Do |
+| Auth (JWT)                   | ⬜️ To Do |
+| Video Upload (S3 + Mongo)    | ⬜️ To Do |
+| Likes + Comments             | ⬜️ To Do |
+| WebSockets                   | ⬜️ To Do |
+| React UI (Feed, Upload, etc) | ⬜️ To Do |
+| Testing & Deployment         | ⬜️ To Do |
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Great — now that your video router structure is finalized and mounted cleanly in `main.py`, you're ready to move forward with **implementing the logic** behind each grouped router. Here's a step-by-step roadmap from here:
+
+---
+
+### ✅ **Next Steps: Implement Each Video Router**
+
+#### 1. **`video_create_router.py`** – *Upload, Draft, Finalize*
+
+Handles:
+
+* ✅ `POST /upload-url` (generate pre-signed S3 URL)
+* ✅ `POST /drafts` (create new draft)
+* ✅ `PATCH /drafts/{draft_id}` (update draft info)
+* ✅ `POST /finalize` (convert draft → video)
+
+You’ll need:
+
+* `S3Service` (for presigned URLs)
+* `VideoDraftRepository`
+* `VideoRepository`
+
+---
+
+#### 2. **`video_manage_router.py`** – *Edit, Delete, Privacy, Feature*
+
+Handles:
+
+* ✅ `DELETE /{video_id}`
+* ✅ `PATCH /{video_id}/privacy`
+* ✅ `PATCH /{video_id}/feature`
+
+You’ll need:
+
+* `VideoRepository`
+* Possibly `VideoPolicy`/ownership checks
+
+---
+
+#### 3. **`video_explore_router.py`** – *Playback, Discoverability, Views*
+
+Handles:
+
+* ✅ `GET /stream/{video_id}`
+* ✅ `GET /thumbnail/{video_id}`
+* ✅ `POST /{video_id}/views`
+* ✅ `GET /featured`
+* ✅ `GET /search`
+
+You’ll need:
+
+* `VideoRepository`
+* `ViewTrackerService` (optional)
+* S3 for thumbnails
+
+---
+
+#### 4. **`video_interact_router.py`** – *Like, Comment (optional for now)*
+
+Handles:
+
+* ✅ `POST /{video_id}/like`
+* ✅ `DELETE /{video_id}/unlike`
+* ✅ `POST /{video_id}/comment`
+* ✅ `GET /{video_id}/comments`
+
+You already have a dedicated like/comment router, so this may **not** be needed unless you decide to centralize engagement under videos.
+
+---
+
+### 🔁 **Integration Notes**
+
+* All routers share:
+
+  * `get_logged_in_user()`
+  * `VideoRepository`, `VideoDraftRepository`
+  * Common response schemas (e.g., `VideoResponse`, `DraftResponse`)
+* If needed, create a **`services/video/`** directory with submodules:
+
+  * `upload.py`, `draft.py`, `edit.py`, `explore.py`, etc.
+
+---
+
+### 🚀 Want to proceed now?
+
+Just let me know which router you’d like to begin implementing (e.g., `video_create_router.py`), and I’ll scaffold the endpoints + service/repo logic for you.
